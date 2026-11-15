@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-extrabold font-outfit text-white mb-2">Platform Administration Center</h1>
+    <p class="text-sm text-gray-400">Monitor trading activities, review catalog inventories, and oversee B2B registered accounts.</p>
+</div>
+
+<!-- Stats Counter Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <div class="glass-panel rounded-2xl p-5 border border-white/5">
+        <span class="text-xs text-gray-500 block">Global Platform Sales</span>
+        <span class="text-2xl font-extrabold text-white font-outfit">${{ total_revenue|floatformat:2 }}</span>
+    </div>
+    <div class="glass-panel rounded-2xl p-5 border border-white/5">
+        <span class="text-xs text-gray-500 block">Total Orders Logged</span>
+        <span class="text-2xl font-extrabold text-white font-outfit">{{ total_orders }} Orders</span>
+    </div>
+    <div class="glass-panel rounded-2xl p-5 border border-white/5">
+        <span class="text-xs text-gray-500 block">Critical Inventory Warnings</span>
+        <span class="text-2xl font-extrabold text-red-400 font-outfit">{{ low_stock }} Varieties</span>
+    </div>
+    <div class="glass-panel rounded-2xl p-5 border border-white/5">
+        <span class="text-xs text-gray-500 block">Registered Entities</span>
+        <span class="text-2xl font-extrabold text-white font-outfit">{{ users.count }} Accounts</span>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- User Management Table -->
+    <div class="lg:col-span-6">
+        <div class="glass-panel rounded-3xl p-6 border border-white/5">
+            <h3 class="text-lg font-bold text-white font-outfit mb-6">Registered Trade Entities</h3>
+            
+            <div class="overflow-x-auto max-h-[400px] overflow-y-auto pr-2">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="text-gray-500 border-b border-white/5 uppercase text-xs">
+                            <th class="pb-2">Username</th>
+                            <th class="pb-2">Company</th>
+                            <th class="pb-2">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-300">
+                        {% for u in users %}
+                            <tr class="border-b border-white/5">
+                                <td class="py-3 font-semibold text-white">{{ u.username }}</td>
+                                <td class="py-3 text-xs text-gray-400">{{ u.company_name|default:'-' }}</td>
+                                <td class="py-3">
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-neonGreen/10 text-neonGreen border border-neonGreen/20">
+                                        {{ u.role }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Orders Log -->
+    <div class="lg:col-span-6">
+        <div class="glass-panel rounded-3xl p-6 border border-white/5">
+            <h3 class="text-lg font-bold text-white font-outfit mb-6">Recent Sourcing Orders</h3>
+            
+            <div class="overflow-x-auto max-h-[400px] overflow-y-auto pr-2">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="text-gray-500 border-b border-white/5 uppercase text-xs">
+                            <th class="pb-2">ID</th>
+                            <th class="pb-2">Buyer</th>
+                            <th class="pb-2">Total Amount</th>
+                            <th class="pb-2">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-300">
+                        {% for order in orders %}
+                            <tr class="border-b border-white/5">
+                                <td class="py-3 font-bold text-white">#{{ order.id }}</td>
+                                <td class="py-3 text-xs">{{ order.buyer.username }}</td>
+                                <td class="py-3 font-bold font-outfit text-white">${{ order.total_amount|floatformat:2 }}</td>
+                                <td class="py-3">
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase 
+                                          {% if order.status == 'DELIVERED' %}bg-emerald-950 text-emerald-400 border border-emerald-500/20
+                                          {% elif order.status == 'PAID' %}bg-blue-950 text-blue-400 border border-blue-500/20
+                                          {% elif order.status == 'SHIPPED' %}bg-yellow-950 text-yellow-400 border border-yellow-500/20
+                                          {% else %}bg-gray-900 text-gray-400 border border-gray-500/20{% endif %}">
+                                        {{ order.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

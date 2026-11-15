@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-extrabold font-outfit text-white mb-2">AI Copilot Tools Suite</h1>
+    <p class="text-sm text-gray-400">Run invoice translation, inspect global price indices, and explore automated sourcing recommendations.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+    <!-- Invoice Scanner -->
+    <div class="lg:col-span-8">
+        <div class="glass-panel rounded-3xl p-6 border border-borderGlass">
+            <h3 class="text-lg font-bold text-white font-outfit mb-2 flex items-center gap-2">
+                <i class="ri-scan-2-line text-neonGreen"></i> Smart Invoice OCR Reader
+            </h3>
+            <p class="text-xs text-gray-400 mb-6">Upload a purchase sheet or trade invoice image. Our engine parses the parameters to populate your cargo cart.</p>
+
+            <form method="POST" enctype="multipart/form-data" class="p-8 border-2 border-dashed border-white/10 hover:border-neonGreen/40 rounded-2xl text-center cursor-pointer transition-colors bg-black/20 mb-6">
+                {% csrf_token %}
+                <input type="file" name="invoice_file" id="invoice_file" class="hidden" onchange="this.form.submit()">
+                <label for="invoice_file" class="cursor-pointer block">
+                    <i class="ri-file-upload-line text-4xl text-gray-500 hover:text-neonGreen transition-colors mb-3 block"></i>
+                    <span class="font-semibold text-white block mb-1">Click to Upload Trade Invoice</span>
+                    <span class="text-xs text-gray-500">Supports PDF, PNG, JPG, CSV (Seed simulation)</span>
+                </label>
+            </form>
+
+            {% if invoice_results %}
+                <div class="mt-6 p-6 rounded-2xl bg-black/40 border border-neonGreen/20">
+                    <div class="flex flex-wrap justify-between items-center pb-4 border-b border-white/5 mb-4">
+                        <div>
+                            <span class="text-[10px] text-gray-400 uppercase font-bold block">File Analyzed</span>
+                            <span class="text-sm font-semibold text-white">{{ invoice_results.file_name }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-gray-400 uppercase font-bold block">Confidence Level</span>
+                            <span class="text-xs font-bold text-emerald-400">{{ invoice_results.confidence }}</span>
+                        </div>
+                    </div>
+
+                    <table class="w-full text-left text-xs mb-6">
+                        <thead>
+                            <tr class="text-gray-500 border-b border-white/5 uppercase">
+                                <th class="pb-2">Parsed Variety</th>
+                                <th class="pb-2 text-right">Qty (kg)</th>
+                                <th class="pb-2 text-right">Est. Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-300">
+                            {% for item in invoice_results.items %}
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 font-semibold text-white">{{ item.name }}</td>
+                                    <td class="py-3 text-right font-mono">{{ item.quantity }} kg</td>
+                                    <td class="py-3 text-right font-mono">${{ item.est_cost|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="flex justify-between items-center pt-2">
+                        <div>
+                            <span class="text-[10px] text-gray-500 block">Total Est. Value</span>
+                            <span class="text-xl font-extrabold text-white font-outfit">${{ invoice_results.total_extracted|floatformat:2 }}</span>
+                        </div>
+                        <a href="{% url 'ai_engine:import_ocr' %}" class="px-6 py-2.5 bg-neonGreen hover:bg-emerald-500 text-black font-extrabold rounded-lg text-xs transition-all shadow-[0_0_10px_rgba(57,255,20,0.3)]">
+                            Import All to Cargo Cart
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Market Index -->
+    <div class="lg:col-span-4">
+        <div class="glass-panel rounded-3xl p-6 border border-white/5">
+            <h3 class="text-lg font-bold text-white font-outfit mb-4 flex items-center gap-2">
+                <i class="ri-line-chart-line text-neonGreen"></i> Global Spot Price Index
+            </h3>
+            
+            <div class="space-y-4">
+                {% for trend in trends %}
+                    <div class="p-3.5 rounded-xl bg-black/35 border border-white/5 flex items-center justify-between">
+                        <div>
+                            <span class="font-bold text-white text-sm block">{{ trend.category }}</span>
+                            <span class="text-[10px] text-gray-500">Demand Score: {{ trend.demand_index }}/100</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold font-mono text-sm {% if trend.price_change >= 0 %}text-emerald-400{% else %}text-red-400{% endif %}">
+                                {% if trend.price_change >= 0 %}+{% endif %}{{ trend.price_change }}%
+                            </span>
+                            <span class="text-[9px] text-gray-500 block uppercase">{{ trend.status }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations List -->
+<div class="glass-panel rounded-3xl p-6 border border-white/5">
+    <h3 class="text-xl font-bold font-outfit text-white mb-6 flex items-center gap-2">
+        <i class="ri-lightbulb-line text-neonGreen"></i> Automated Procurement Matches
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for prod in recommendations %}
+            <div class="p-4 rounded-2xl bg-black/20 border border-white/5 hover:border-neonGreen/20 transition-all">
+                <h4 class="font-bold text-white text-md line-clamp-1 mb-1">{{ prod.name }}</h4>
+                <span class="text-[10px] text-gray-400 block mb-3 uppercase">{{ prod.category.name }} ({{ prod.grade }})</span>
+                <div class="flex justify-between items-center">
+                    <span class="text-md font-extrabold text-white font-outfit">${{ prod.price }}/kg</span>
+                    <a href="{% url 'products:detail' slug=prod.slug %}" class="text-xs text-neonGreen font-semibold hover:underline">View details</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

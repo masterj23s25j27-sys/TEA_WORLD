@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-12 text-center">
+    <div class="glass-panel rounded-3xl p-8 border border-borderGlass shadow-2xl">
+        <div class="w-20 h-20 rounded-full bg-neonGreen/10 border border-neonGreen/30 flex items-center justify-center mx-auto mb-6 text-neonGreen text-4xl neon-text-glow">
+            <i class="ri-checkbox-circle-fill"></i>
+        </div>
+
+        <h1 class="text-3xl font-extrabold font-outfit text-white mb-2">Order Confirmed!</h1>
+        <p class="text-sm text-gray-400 mb-8">We have successfully verified your B2B transaction. A digital copy of the invoice is being sent to your email.</p>
+
+        <!-- Order Summary Details -->
+        <div class="bg-black/30 rounded-2xl p-6 border border-white/5 text-left space-y-4 mb-8">
+            <div class="flex justify-between text-sm pb-3 border-b border-white/5">
+                <span class="text-gray-400">Order Number</span>
+                <span class="font-bold text-white">#{{ order.id }}</span>
+            </div>
+            <div class="flex justify-between text-sm pb-3 border-b border-white/5">
+                <span class="text-gray-400">Freight Tracking Number</span>
+                <span class="font-bold text-neonGreen font-mono">{{ order.tracking_number }}</span>
+            </div>
+            <div class="flex justify-between text-sm pb-3 border-b border-white/5">
+                <span class="text-gray-400">Payment Status</span>
+                <span class="px-2 py-0.5 rounded text-xs bg-emerald-950 text-emerald-400 border border-emerald-500/20 font-bold uppercase">{{ order.status }}</span>
+            </div>
+            <div class="flex justify-between text-sm pb-3 border-b border-white/5">
+                <span class="text-gray-400">Transaction Method</span>
+                <span class="font-bold text-white">{{ order.payment_method }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-400">Invoice Total</span>
+                <span class="font-bold text-white text-md font-outfit">${{ order.total_amount|floatformat:2 }}</span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 justify-center">
+            <a href="{% url 'dashboard:buyer_dashboard' %}" class="px-6 py-3 bg-neonGreen hover:bg-emerald-500 text-black font-extrabold rounded-xl transition-all shadow-[0_0_15px_rgba(57,255,20,0.3)]">
+                Go to Buyer Portal
+            </a>
+            <a href="{% url 'products:list' %}" class="px-6 py-3 border border-gray-600 hover:border-neonGreen hover:bg-neonGreen/5 text-white font-bold rounded-xl transition-all">
+                Continue Sourcing
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

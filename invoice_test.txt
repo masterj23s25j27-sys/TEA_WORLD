@@ -1,0 +1,11 @@
+TeaVerse B2B Purchase Order Invoice
+Supplier: Himalayan Organic Tea Estates
+Delivery Target: Florida Cargo Port
+
+Items Ordered:
+- Darjeeling First Flush Autumnal: 50 kg
+- Uji Sencha Premium: 30 kg
+- Silver Needle (Baihao Yinzhen): 15 kg
+
+Total Cost Estimate: $5,175.00
+Authorized: Buyer Account

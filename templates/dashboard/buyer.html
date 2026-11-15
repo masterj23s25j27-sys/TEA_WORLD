@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+    <div>
+        <h1 class="text-3xl font-extrabold font-outfit text-white mb-2">Wholesale Buyer Workspace</h1>
+        <p class="text-sm text-gray-400">Manage cargo shipments, review transaction logs, and top up trade balance.</p>
+    </div>
+    
+    <!-- Quick Wallet recharge card -->
+    <div class="glass-panel rounded-2xl p-4 border border-emerald-500/20 bg-emerald-950/20 flex items-center gap-4 w-full lg:w-auto">
+        <div>
+            <span class="text-[10px] text-emerald-400 font-bold block uppercase">Trade Balance</span>
+            <span class="text-2xl font-extrabold font-outfit text-white">${{ user.wallet_balance|floatformat:2 }}</span>
+        </div>
+        <form method="POST" action="{% url 'accounts:recharge_wallet' %}" class="flex gap-2">
+            {% csrf_token %}
+            <input type="number" name="amount" value="5000" min="500" step="500"
+                   class="w-20 px-2 py-1.5 rounded bg-black/40 border border-white/10 text-white text-xs font-bold focus:outline-none">
+            <button type="submit" class="px-4 py-1.5 bg-neonGreen hover:bg-emerald-500 text-black text-xs font-extrabold rounded transition-colors shadow-[0_0_8px_rgba(57,255,20,0.2)]">
+                Add Funds
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Stats Counter Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-neonGreen/10 border border-neonGreen/30 flex items-center justify-center text-neonGreen text-xl">
+            <i class="ri-shopping-bag-3-line"></i>
+        </div>
+        <div>
+            <span class="text-xs text-gray-500 block">Active Orders</span>
+            <span class="text-2xl font-extrabold text-white font-outfit">{{ orders_count }} Orders</span>
+        </div>
+    </div>
+    <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-neonGreen/10 border border-neonGreen/30 flex items-center justify-center text-neonGreen text-xl">
+            <i class="ri-money-dollar-circle-line"></i>
+        </div>
+        <div>
+            <span class="text-xs text-gray-500 block">Total Sourcing Spend</span>
+            <span class="text-2xl font-extrabold text-white font-outfit">${{ total_spent|floatformat:2 }}</span>
+        </div>
+    </div>
+    <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-neonGreen/10 border border-neonGreen/30 flex items-center justify-center text-neonGreen text-xl">
+            <i class="ri-building-line"></i>
+        </div>
+        <div>
+            <span class="text-xs text-gray-500 block">Business Company</span>
+            <span class="text-lg font-bold text-white line-clamp-1">{{ user.company_name|default:'Independent Cafe Partner' }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Order History -->
+<div class="glass-panel rounded-3xl p-6 border border-white/5">
+    <h3 class="text-xl font-bold font-outfit text-white mb-6">Cargo Sourcing History</h3>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+            <thead>
+                <tr class="text-gray-500 border-b border-white/5 uppercase text-xs">
+                    <th class="pb-3">Order ID</th>
+                    <th class="pb-3">Placement Date</th>
+                    <th class="pb-3">Tracking Number</th>
+                    <th class="pb-3">Items list</th>
+                    <th class="pb-3">Total Cost</th>
+                    <th class="pb-3">Shipment Status</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-300">
+                {% for order in orders %}
+                    <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                        <td class="py-4 font-bold text-white">#{{ order.id }}</td>
+                        <td class="py-4">{{ order.created_at|date:"M d, Y H:i" }}</td>
+                        <td class="py-4 font-mono text-neonGreen text-xs">{{ order.tracking_number }}</td>
+                        <td class="py-4">
+                            <ul class="list-disc list-inside text-xs text-gray-400">
+                                {% for item in order.items.all %}
+                                    <li>{{ item.quantity }}kg x {{ item.product.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="py-4 font-bold font-outfit text-white">${{ order.total_amount|floatformat:2 }}</td>
+                        <td class="py-4">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase 
+                                  {% if order.status == 'DELIVERED' %}bg-emerald-950 text-emerald-400 border border-emerald-500/20
+                                  {% elif order.status == 'PAID' %}bg-blue-950 text-blue-400 border border-blue-500/20
+                                  {% elif order.status == 'SHIPPED' %}bg-yellow-950 text-yellow-400 border border-yellow-500/20
+                                  {% else %}bg-gray-900 text-gray-400 border border-gray-500/20{% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-gray-500 italic">No wholesale orders recorded.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

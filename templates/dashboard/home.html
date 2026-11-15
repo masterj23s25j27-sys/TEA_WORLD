@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative rounded-3xl overflow-hidden glass-panel border border-borderGlass p-8 sm:p-16 mb-12">
+    <div class="absolute inset-0 bg-gradient-to-r from-emerald-950/30 to-black/50 pointer-events-none"></div>
+    <div class="relative z-10 max-w-3xl">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-neonGreen/10 text-neonGreen border border-neonGreen/30 mb-6">
+            <i class="ri-sparkling-fill animate-spin"></i> Next-Gen B2B Tea Trading
+        </span>
+        <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight font-outfit text-white mb-6 leading-tight">
+            The Smart Global <span class="text-transparent bg-clip-text bg-gradient-to-r from-neonGreen to-emerald-400">Tea Wholesale</span> Marketplace
+        </h1>
+        <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+            Source directly from certified estates, run AI-driven pricing simulations, and track shipments in real-time. Designed specifically for cafe chains, wholesalers, and premium retailers worldwide.
+        </p>
+        <div class="flex flex-wrap gap-4">
+            <a href="{% url 'products:list' %}" class="px-8 py-4 bg-neonGreen hover:bg-emerald-500 text-black font-extrabold rounded-xl transition-all shadow-[0_0_20px_rgba(57,255,20,0.4)] transform hover:-translate-y-0.5">
+                Explore Tea Catalog
+            </a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'accounts:register' %}" class="px-8 py-4 border border-gray-600 hover:border-neonGreen hover:bg-neonGreen/5 text-white font-bold rounded-xl transition-all">
+                    Register Estate / Buyer Account
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Stats Counter Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+    <div class="glass-panel rounded-2xl p-6 text-center border-l-4 border-l-neonGreen">
+        <p class="text-3xl font-extrabold font-outfit text-white mb-1">100,000+</p>
+        <p class="text-sm text-gray-400">Metric Tons Traded</p>
+    </div>
+    <div class="glass-panel rounded-2xl p-6 text-center border-l-4 border-l-emerald-400">
+        <p class="text-3xl font-extrabold font-outfit text-white mb-1">15+</p>
+        <p class="text-sm text-gray-400">Tea Producing Origins</p>
+    </div>
+    <div class="glass-panel rounded-2xl p-6 text-center border-l-4 border-l-neonGreen">
+        <p class="text-3xl font-extrabold font-outfit text-white mb-1">4.9 / 5</p>
+        <p class="text-sm text-gray-400">AI Trust Sentiment</p>
+    </div>
+    <div class="glass-panel rounded-2xl p-6 text-center border-l-4 border-l-emerald-400">
+        <p class="text-3xl font-extrabold font-outfit text-white mb-1">24 Hour</p>
+        <p class="text-sm text-gray-400">Average Logistics Dispatch</p>
+    </div>
+</div>
+
+<!-- Categories Highlight -->
+<div class="mb-16">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-bold font-outfit text-white">Browse By Category</h2>
+            <p class="text-sm text-gray-400">Select standard varieties processed globally</p>
+        </div>
+        <a href="{% url 'products:list' %}" class="text-neonGreen hover:underline text-sm font-semibold flex items-center gap-1">
+            See All <i class="ri-arrow-right-line"></i>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {% for cat in categories %}
+            <a href="{% url 'products:list' %}?category={{ cat.slug }}" class="glass-panel rounded-xl p-5 text-center flex flex-col items-center hover:scale-105 transition-transform duration-300 border border-white/5 hover:border-neonGreen/40">
+                <div class="w-12 h-12 rounded-lg bg-neonGreen/10 flex items-center justify-center text-neonGreen text-2xl mb-3">
+                    <i class="{{ cat.icon_class }}"></i>
+                </div>
+                <h3 class="font-semibold text-white text-sm">{{ cat.name }}</h3>
+                <span class="text-xs text-gray-500 mt-1">10+ varieties</span>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="mb-16">
+    <h2 class="text-3xl font-bold font-outfit text-white text-center mb-12">Built-in Intelligent Features</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="glass-panel rounded-2xl p-6 border border-white/5">
+            <div class="text-neonGreen text-3xl mb-4"><i class="ri-robot-2-line"></i></div>
+            <h3 class="text-lg font-bold text-white mb-2">Negotiation & Support Bot</h3>
+            <p class="text-sm text-gray-400">Chat directly with the sha_Tea chatbot to review cargo availability, logistics estimates, and bulk quotes.</p>
+        </div>
+        <div class="glass-panel rounded-2xl p-6 border border-white/5">
+            <div class="text-neonGreen text-3xl mb-4"><i class="ri-line-chart-line"></i></div>
+            <h3 class="text-lg font-bold text-white mb-2">Market Price Predictions</h3>
+            <p class="text-sm text-gray-400">Get automated predictions on global harvest impacts, shipping costs, and spot pricing fluctuations.</p>
+        </div>
+        <div class="glass-panel rounded-2xl p-6 border border-white/5">
+            <div class="text-neonGreen text-3xl mb-4"><i class="ri-scan-2-line"></i></div>
+            <h3 class="text-lg font-bold text-white mb-2">AI Invoice OCR Scanner</h3>
+            <p class="text-sm text-gray-400">Upload standard purchase spreadsheets or paper invoices to immediately translate them into cart orders.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

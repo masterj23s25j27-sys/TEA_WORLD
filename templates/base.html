@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sha_Tea - Smart Tea Wholesale Marketplace</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS (for layout utilities) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090b0d',
+                        darkCard: 'rgba(17, 22, 28, 0.7)',
+                        neonGreen: '#39ff14',
+                        neonEmerald: '#10b981',
+                        borderGlass: 'rgba(57, 255, 20, 0.15)',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #07090b 0%, #0f1319 50%, #080a0c 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(17, 22, 28, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(57, 255, 20, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-input {
+            background: rgba(8, 10, 14, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            border-color: #39ff14;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.25);
+            outline: none;
+        }
+
+        .neon-text-glow {
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+        }
+
+        .neon-border-glow:hover {
+            border-color: #39ff14;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090b0d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #39ff14;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased flex flex-col">
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-50 w-full glass-panel border-b border-borderGlass">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="{% url 'dashboard:home' %}" class="flex items-center gap-2 font-outfit text-2xl font-extrabold tracking-wider text-white">
+                        <i class="ri-leaf-fill text-neonGreen neon-text-glow"></i>
+                        <span>sha_<span class="text-neonGreen">Tea</span><span class="text-xs align-super text-emerald-400 font-bold px-1 py-0.5 rounded bg-emerald-950 border border-emerald-500/30">AI</span></span>
+                    </a>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="{% url 'products:list' %}" class="text-gray-300 hover:text-neonGreen px-3 py-2 rounded-md text-sm font-medium transition-colors">Marketplace</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'ai_engine:tools_dashboard' %}" class="text-gray-300 hover:text-neonGreen px-3 py-2 rounded-md text-sm font-medium transition-colors"><i class="ri-sparkling-fill text-neonGreen mr-1"></i>AI Tools</a>
+                        
+                        <!-- Role-based Dashboards -->
+                        {% if user.role == 'BUYER' or user.is_superuser %}
+                            <a href="{% url 'dashboard:buyer_dashboard' %}" class="text-gray-300 hover:text-neonGreen px-3 py-2 rounded-md text-sm font-medium transition-colors">Buyer Portal</a>
+                        {% endif %}
+                        {% if user.role == 'VENDOR' or user.is_superuser %}
+                            <a href="{% url 'dashboard:vendor_dashboard' %}" class="text-gray-300 hover:text-neonGreen px-3 py-2 rounded-md text-sm font-medium transition-colors">Vendor Portal</a>
+                        {% endif %}
+                        {% if user.role == 'DELIVERY' or user.role == 'DISTRIBUTOR' or user.is_superuser %}
+                            <a href="{% url 'dashboard:delivery_portal' %}" class="text-gray-300 hover:text-neonGreen px-3 py-2 rounded-md text-sm font-medium transition-colors">Logistics</a>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            <a href="{% url 'dashboard:admin_dashboard' %}" class="text-red-400 hover:text-red-300 px-3 py-2 rounded-md text-sm font-medium transition-colors">Admin</a>
+                        {% endif %}
+                    {% endif %}
+                </nav>
+
+                <!-- Right Side Actions -->
+                <div class="flex items-center gap-4">
+                    {% if user.is_authenticated %}
+                        <!-- Cart -->
+                        <a href="{% url 'orders:cart_detail' %}" class="relative p-2 text-gray-300 hover:text-neonGreen transition-colors">
+                            <i class="ri-shopping-cart-2-line text-2xl"></i>
+                            {% if cart_items_count > 0 %}
+                                <span class="absolute -top-1 -right-1 bg-neonGreen text-black font-extrabold text-[10px] w-5 h-5 flex items-center justify-center rounded-full border border-black animate-pulse">
+                                    {{ cart_items_count }}
+                                </span>
+                            {% endif %}
+                        </a>
+
+                        <!-- Wallet Display -->
+                        <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-emerald-400 text-sm font-semibold">
+                            <i class="ri-wallet-3-line"></i>
+                            <span>${{ user.wallet_balance|floatformat:2 }}</span>
+                        </div>
+
+                        <!-- Chat Assist -->
+                        <a href="{% url 'ai_engine:chatbot' %}" class="p-2 rounded-full bg-neonGreen/10 border border-neonGreen/30 text-neonGreen hover:bg-neonGreen hover:text-black transition-all">
+                            <i class="ri-robot-2-line text-xl"></i>
+                        </a>
+
+                        <!-- User Profile Menu -->
+                        <span class="text-gray-300 text-sm font-medium hidden sm:inline">{{ user.username }} ({{ user.role }})</span>
+                        <a href="{% url 'accounts:logout' %}" class="px-4 py-2 border border-red-500/40 hover:bg-red-500 hover:text-white text-red-400 rounded-lg text-sm font-medium transition-all">
+                            Logout
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            Sign In
+                        </a>
+                        <a href="{% url 'accounts:register' %}" class="px-5 py-2.5 bg-neonGreen hover:bg-emerald-500 text-black font-bold rounded-lg text-sm transition-all transform hover:-translate-y-0.5 shadow-[0_0_15px_rgba(57,255,20,0.3)]">
+                            Join Marketplace
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Message Alerts -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            {% for message in messages %}
+                <div class="flex items-center p-4 mb-4 text-sm rounded-lg border glass-panel {% if message.tags == 'error' %}text-red-400 border-red-500/30 bg-red-950/20{% else %}text-emerald-400 border-emerald-500/30 bg-emerald-950/20{% endif %}" role="alert">
+                    <i class="{% if message.tags == 'error' %}ri-error-warning-line{% else %}ri-checkbox-circle-line{% endif %} text-lg mr-2"></i>
+                    <div>
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full glass-panel border-t border-borderGlass/50 mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <i class="ri-leaf-fill text-neonGreen"></i>
+                <span class="text-sm text-gray-400">&copy; 2026 sha_Tea Marketplace. All rights reserved.</span>
+            </div>
+            <div class="flex gap-6 text-sm text-gray-400">
+                <a href="#" class="hover:text-neonGreen transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-neonGreen transition-colors">Terms of Trade</a>
+                <a href="#" class="hover:text-neonGreen transition-colors">Global Logistics network</a>
+                <a href="#" class="hover:text-neonGreen transition-colors">API documentation</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

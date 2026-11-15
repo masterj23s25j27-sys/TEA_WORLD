@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'products:list' %}" class="text-xs text-gray-400 hover:text-neonGreen flex items-center gap-1">
+        <i class="ri-arrow-left-line"></i> Back to Wholesale Catalog
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+    <!-- Product Media -->
+    <div class="lg:col-span-5">
+        <div class="glass-panel rounded-3xl overflow-hidden border border-borderGlass p-2">
+            <div class="relative h-96 rounded-2xl overflow-hidden bg-black/40">
+                {% if product.image_url %}
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-600">
+                        <i class="ri-image-2-line text-6xl"></i>
+                    </div>
+                {% endif %}
+                <span class="absolute top-4 left-4 px-3 py-1 bg-black/70 border border-white/10 rounded-lg text-sm font-semibold text-white">
+                    Grade: {{ product.grade }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="lg:col-span-7 flex flex-col justify-between">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-neonGreen/10 text-neonGreen border border-neonGreen/30 uppercase">
+                    {{ product.category.name }}
+                </span>
+                <span class="text-xs text-gray-400">Listed by: <strong class="text-white">{{ product.vendor.company_name|default:product.vendor.username }}</strong></span>
+            </div>
+            
+            <h1 class="text-3xl sm:text-4xl font-extrabold font-outfit text-white mb-4">{{ product.name }}</h1>
+            
+            <div class="flex items-center gap-6 mb-6 pb-6 border-b border-white/5 text-sm text-gray-300">
+                <span><i class="ri-map-pin-2-line text-neonGreen mr-1"></i>Origin: <strong>{{ product.origin }}</strong></span>
+                <span><i class="ri-star-fill text-yellow-500 mr-1"></i>Rating: <strong>{{ product.average_rating|default:"0.0" }}</strong></span>
+                <span><i class="ri-stack-line text-emerald-400 mr-1"></i>Stock: <strong>{{ product.stock }} kg</strong></span>
+            </div>
+
+            <p class="text-gray-300 leading-relaxed mb-6">{{ product.description }}</p>
+        </div>
+
+        <!-- Purchase Card -->
+        <div class="glass-panel rounded-2xl p-6 border border-neonGreen/20">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                    <span class="text-3xl font-extrabold font-outfit text-white">${{ product.price }}</span>
+                    <span class="text-xs text-gray-400">/ per kg (wholesale spot)</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-gray-500 block">Min. Order Limit</span>
+                    <span class="text-sm font-bold text-gray-300">10 kg (standard cargo bag)</span>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'orders:add_to_cart' product_id=product.id %}" class="flex flex-col sm:flex-row gap-4">
+                {% csrf_token %}
+                <div class="flex items-center glass-input rounded-xl px-3 py-2 flex-grow sm:max-w-[200px]">
+                    <span class="text-xs text-gray-500 mr-2 uppercase font-bold">Qty (kg)</span>
+                    <input type="number" name="quantity" value="10" min="10" max="{{ product.stock }}" step="5"
+                           class="w-full bg-transparent text-white font-extrabold text-right focus:outline-none">
+                </div>
+                <button type="submit" 
+                        class="flex-grow py-4 bg-neonGreen hover:bg-emerald-500 text-black font-extrabold rounded-xl transition-all shadow-[0_0_15px_rgba(57,255,20,0.3)] flex items-center justify-center gap-2">
+                    <i class="ri-shopping-bag-3-line"></i> Add to Cargo Cart
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- AI Review Insights & User Reviews -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Sentiment Summary -->
+    <div class="lg:col-span-4">
+        <div class="glass-panel rounded-2xl p-6 border border-white/5">
+            <h3 class="text-lg font-bold text-white font-outfit mb-4 flex items-center gap-1.5">
+                <i class="ri-sparkling-fill text-neonGreen animate-pulse"></i> AI Sentiment Summary
+            </h3>
+            
+            <p class="text-sm text-gray-300 leading-relaxed mb-6 bg-black/40 p-4 rounded-xl border border-white/5">
+                {{ ai_summary }}
+            </p>
+
+            <div class="space-y-3">
+                <div>
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Positive Sentiments</span>
+                        <span class="text-emerald-400">{{ positive_count }} reviews</span>
+                    </div>
+                    <div class="w-full bg-black/50 h-2 rounded-full overflow-hidden">
+                        <div class="bg-emerald-400 h-full" style="width: {% if reviews %}{% widthratio positive_count reviews.count 100 %}{% else %}0{% endif %}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Negative Sentiments</span>
+                        <span class="text-red-400">{{ negative_count }} reviews</span>
+                    </div>
+                    <div class="w-full bg-black/50 h-2 rounded-full overflow-hidden">
+                        <div class="bg-red-400 h-full" style="width: {% if reviews %}{% widthratio negative_count reviews.count 100 %}{% else %}0{% endif %}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span>Neutral Sentiments</span>
+                        <span class="text-gray-400">{{ neutral_count }} reviews</span>
+                    </div>
+                    <div class="w-full bg-black/50 h-2 rounded-full overflow-hidden">
+                        <div class="bg-gray-500 h-full" style="width: {% if reviews %}{% widthratio neutral_count reviews.count 100 %}{% else %}0{% endif %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Feedback -->
+    <div class="lg:col-span-8">
+        <div class="glass-panel rounded-2xl p-6 border border-white/5 mb-8">
+            <h3 class="text-lg font-bold text-white font-outfit mb-6">User Reviews & Feedback</h3>
+
+            <div class="space-y-6 max-h-[400px] overflow-y-auto pr-2 mb-8">
+                {% for review in reviews %}
+                    <div class="p-4 rounded-xl bg-black/25 border border-white/5">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-bold text-gray-200 text-sm">{{ review.buyer.username }}</span>
+                            <span class="text-xs text-gray-500">{{ review.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="flex text-yellow-500 text-xs">
+                                {% for i in "12345" %}
+                                    <i class="{% if forloop.counter <= review.rating %}ri-star-fill{% else %}ri-star-line{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="text-[10px] px-2 py-0.5 rounded {% if review.ai_sentiment == 'Positive' %}bg-emerald-950 text-emerald-400 border border-emerald-500/20{% elif review.ai_sentiment == 'Negative' %}bg-red-950 text-red-400 border border-red-500/20{% else %}bg-gray-900 text-gray-400 border border-gray-500/20{% endif %}">
+                                AI Sentiment: {{ review.ai_sentiment }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-300">{{ review.comment }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-gray-500 italic">No reviews submitted yet for this product.</p>
+                {% endfor %}
+            </div>
+
+            <!-- Review Form -->
+            {% if user.is_authenticated %}
+                <div class="border-t border-white/5 pt-6">
+                    <h4 class="text-md font-bold text-white mb-4">Submit Trade Feedback</h4>
+                    <form method="POST" action="{% url 'products:add_review' product_id=product.id %}" class="space-y-4">
+                        {% csrf_token %}
+                        <div class="flex items-center gap-4">
+                            <label for="rating" class="text-sm text-gray-300">Rating Rating</label>
+                            <select name="rating" id="rating" class="glass-input rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none">
+                                <option value="5">5 Stars (Excellent)</option>
+                                <option value="4">4 Stars (Good)</option>
+                                <option value="3">3 Stars (Average)</option>
+                                <option value="2">2 Stars (Poor)</option>
+                                <option value="1">1 Star (Terrible)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <textarea name="comment" rows="3" required placeholder="Write your review... (Our AI reviews agent will parse sentiment analysis)"
+                                      class="w-full px-4 py-3 rounded-xl glass-input text-white text-sm focus:outline-none"></textarea>
+                        </div>
+                        <button type="submit" 
+                                class="px-6 py-2.5 bg-neonGreen hover:bg-emerald-500 text-black font-extrabold rounded-lg text-sm transition-all shadow-[0_0_10px_rgba(57,255,20,0.2)]">
+                            Submit Feedback
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

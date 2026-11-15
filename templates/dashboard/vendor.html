@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-extrabold font-outfit text-white mb-2">Tea Garden Vendor Portal</h1>
+    <p class="text-sm text-gray-400">List estate varieties, update bulk tea stock limits, and monitor wholesale fulfillment.</p>
+</div>
+
+<!-- Stats Counter Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-neonGreen/10 border border-neonGreen/30 flex items-center justify-center text-neonGreen text-xl">
+            <i class="ri-money-dollar-box-line"></i>
+        </div>
+        <div>
+            <span class="text-xs text-gray-500 block">Total Realized Revenue</span>
+            <span class="text-2xl font-extrabold text-white font-outfit">${{ total_sales|floatformat:2 }}</span>
+        </div>
+    </div>
+    <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-neonGreen/10 border border-neonGreen/30 flex items-center justify-center text-neonGreen text-xl">
+            <i class="ri-truck-line"></i>
+        </div>
+        <div>
+            <span class="text-xs text-gray-500 block">Active Shipments</span>
+            <span class="text-2xl font-extrabold text-white font-outfit">{{ active_orders.count }} Orders</span>
+        </div>
+    </div>
+    <div class="glass-panel rounded-2xl p-5 border border-white/5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-neonGreen/10 border border-neonGreen/30 flex items-center justify-center text-neonGreen text-xl">
+            <i class="ri-leaf-line"></i>
+        </div>
+        <div>
+            <span class="text-xs text-gray-500 block">Listed Varieties</span>
+            <span class="text-2xl font-extrabold text-white font-outfit">{{ products.count }} Types</span>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Listed Products -->
+    <div class="lg:col-span-8">
+        <div class="glass-panel rounded-3xl p-6 border border-white/5 mb-8">
+            <h3 class="text-lg font-bold text-white font-outfit mb-6">Your Listed Tea Varieties</h3>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="text-gray-500 border-b border-white/5 uppercase text-xs">
+                            <th class="pb-3">Variety</th>
+                            <th class="pb-3">Category</th>
+                            <th class="pb-3">Grade</th>
+                            <th class="pb-3">Price</th>
+                            <th class="pb-3">Stock Limit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-300">
+                        {% for prod in products %}
+                            <tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors">
+                                <td class="py-4">
+                                    <div class="flex items-center gap-3">
+                                        {% if prod.image_url %}
+                                            <img src="{{ prod.image_url }}" alt="{{ prod.name }}" class="w-10 h-10 rounded-lg object-cover">
+                                        {% endif %}
+                                        <div>
+                                            <span class="font-semibold text-white block">{{ prod.name }}</span>
+                                            <span class="text-[10px] text-gray-500">Origin: {{ prod.origin }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4">{{ prod.category.name }}</td>
+                                <td class="py-4 font-semibold text-xs text-gray-300">{{ prod.grade }}</td>
+                                <td class="py-4 font-bold font-outfit text-white">${{ prod.price }}/kg</td>
+                                <td class="py-4">
+                                    <span class="{% if prod.stock < 100 %}text-red-400 font-bold{% else %}text-emerald-400{% endif %}">
+                                        {{ prod.stock }} kg
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-gray-500 italic">No products listed. Use the form to submit cargo catalogs.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Form -->
+    <div class="lg:col-span-4">
+        <div class="glass-panel rounded-3xl p-6 border border-borderGlass">
+            <h3 class="text-lg font-bold text-white font-outfit mb-6">List New Tea Variety</h3>
+            
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="name" class="block text-xs font-bold text-gray-400 mb-1.5 uppercase">Tea Name</label>
+                    <input type="text" name="name" id="name" required 
+                           class="w-full px-4 py-2.5 rounded-lg glass-input text-sm text-white focus:outline-none" 
+                           placeholder="e.g. Darjeeling Special Oolong">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="category" class="block text-xs font-bold text-gray-400 mb-1.5 uppercase">Category</label>
+                        <select name="category" id="category" class="w-full px-4 py-2.5 rounded-lg glass-input text-xs text-white focus:outline-none">
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="grade" class="block text-xs font-bold text-gray-400 mb-1.5 uppercase">Grade</label>
+                        <select name="grade" id="grade" class="w-full px-4 py-2.5 rounded-lg glass-input text-xs text-white focus:outline-none">
+                            {% for key, val in grades %}
+                                <option value="{{ key }}">{{ key }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="price" class="block text-xs font-bold text-gray-400 mb-1.5 uppercase">Price ($/kg)</label>
+                        <input type="number" name="price" id="price" step="0.5" required 
+                               class="w-full px-4 py-2.5 rounded-lg glass-input text-sm text-white text-right focus:outline-none" 
+                               placeholder="35.00">
+                    </div>
+                    <div>
+                        <label for="stock" class="block text-xs font-bold text-gray-400 mb-1.5 uppercase">Stock (kg)</label>
+                        <input type="number" name="stock" id="stock" required 
+                               class="w-full px-4 py-2.5 rounded-lg glass-input text-sm text-white text-right focus:outline-none" 
+                               placeholder="500">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="origin" class="block text-xs font-bold text-gray-400 mb-1.5 uppercase">Harvest Origin</label>
+                    <input type="text" name="origin" id="origin" required 
+                           class="w-full px-4 py-2.5 rounded-lg glass-input text-sm text-white focus:outline-none" 
+                           placeholder="Assam, India">
+                </div>
+
+                <div>
+                    <label for="description" class="block text-xs font-bold text-gray-400 mb-1.5 uppercase">Description</label>
+                    <textarea name="description" id="description" rows="3" 
+                              class="w-full px-4 py-2.5 rounded-lg glass-input text-sm text-white focus:outline-none" 
+                              placeholder="Describe taste profile, processing details..."></textarea>
+                </div>
+
+                <button type="submit" 
+                        class="w-full py-3 bg-neonGreen hover:bg-emerald-500 text-black font-extrabold rounded-xl transition-all shadow-[0_0_12px_rgba(57,255,20,0.3)]">
+                    Publish Listing
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
